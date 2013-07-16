@@ -249,9 +249,15 @@ static inline NSString * AFHMACSHA1Signature(NSURLRequest *request, NSString *co
         }
     }];
 
-    [mutableParameters addEntriesFromDictionary:mutableAuthorizationParameters];
-    [mutableAuthorizationParameters setValue:[self OAuthSignatureForMethod:method path:path parameters:mutableParameters token:self.accessToken] forKey:@"oauth_signature"];
-    
+    // According to RFC 5849, PUT request body shouldn't be used for sign calculate instead of POST request.
+    if (method != nil && [method caseInsensitiveCompare:@"put"] == NSOrderedSame) {
+        [mutableAuthorizationParameters setValue:[self OAuthSignatureForMethod:method path:path parameters:mutableAuthorizationParameters token:self.accessToken] forKey:@"oauth_signature"];
+    }
+    else {
+        [mutableParameters addEntriesFromDictionary:mutableAuthorizationParameters];
+        [mutableAuthorizationParameters setValue:[self OAuthSignatureForMethod:method path:path parameters:mutableParameters token:self.accessToken] forKey:@"oauth_signature"];
+    }
+        
     NSArray *sortedComponents = [[AFQueryStringFromParametersWithEncoding(mutableAuthorizationParameters, self.stringEncoding) componentsSeparatedByString:@"&"] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
     NSMutableArray *mutableComponents = [NSMutableArray array];
     for (NSString *component in sortedComponents) {
