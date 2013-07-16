@@ -276,6 +276,7 @@ static inline NSString * AFHMACSHA1Signature(NSURLRequest *request, NSString *co
                                 accessTokenPath:(NSString *)accessTokenPath
                                    accessMethod:(NSString *)accessMethod
                                           scope:(NSString *)scope
+                                      urlScheme:(NSString *)urlScheme
                                         success:(void (^)(AFOAuth1Token *accessToken, id responseObject))success
                                         failure:(void (^)(NSError *error))failure
 {
@@ -312,16 +313,44 @@ static inline NSString * AFHMACSHA1Signature(NSURLRequest *request, NSString *co
         [parameters setValue:requestToken.key forKey:@"oauth_token"];
         NSMutableURLRequest *request = [super requestWithMethod:@"GET" path:userAuthorizationPath parameters:parameters];
         [request setHTTPShouldHandleCookies:NO];
+        
+        NSURL *url = [request URL];
+        
+        if (urlScheme != nil) {
+            NSString *urlString = [NSString stringWithFormat: @"%@+%@", urlScheme, url];
+            url = [[NSURL alloc] initWithString:urlString];
+        }
+        
 #if __IPHONE_OS_VERSION_MIN_REQUIRED
-        [[UIApplication sharedApplication] openURL:[request URL]];
+        [[UIApplication sharedApplication] openURL:url];
 #else
-        [[NSWorkspace sharedWorkspace] openURL:[request URL]];
+        [[NSWorkspace sharedWorkspace] openURL:url];
 #endif
     } failure:^(NSError *error) {
         if (failure) {
             failure(error);
         }
     }];
+}
+
+- (void)authorizeUsingOAuthWithRequestTokenPath:(NSString *)requestTokenPath
+                          userAuthorizationPath:(NSString *)userAuthorizationPath
+                                    callbackURL:(NSURL *)callbackURL
+                                accessTokenPath:(NSString *)accessTokenPath
+                                   accessMethod:(NSString *)accessMethod
+                                          scope:(NSString *)scope
+                                        success:(void (^)(AFOAuth1Token *accessToken, id responseObject))success
+                                        failure:(void (^)(NSError *error))failure
+{
+    [self authorizeUsingOAuthWithRequestTokenPath:requestTokenPath
+                            userAuthorizationPath:userAuthorizationPath
+                                      callbackURL:callbackURL
+                                  accessTokenPath:accessTokenPath
+                                     accessMethod:accessMethod
+                                            scope:scope
+                                        urlScheme:nil
+                                          success:success
+                                          failure:failure];
 }
 
 - (void)acquireOAuthRequestTokenWithPath:(NSString *)path

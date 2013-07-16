@@ -81,6 +81,19 @@ typedef enum {
                                 accessTokenPath:(NSString *)accessTokenPath
                                    accessMethod:(NSString *)accessMethod
                                           scope:(NSString *)scope
+                                      urlScheme:(NSString *)urlScheme
+                                        success:(void (^)(AFOAuth1Token *accessToken, id responseObject))success
+                                        failure:(void (^)(NSError *error))failure;
+
+/**
+ 
+ */
+- (void)authorizeUsingOAuthWithRequestTokenPath:(NSString *)requestTokenPath
+                          userAuthorizationPath:(NSString *)userAuthorizationPath
+                                    callbackURL:(NSURL *)callbackURL
+                                accessTokenPath:(NSString *)accessTokenPath
+                                   accessMethod:(NSString *)accessMethod
+                                          scope:(NSString *)scope
                                         success:(void (^)(AFOAuth1Token *accessToken, id responseObject))success
                                         failure:(void (^)(NSError *error))failure;
 
